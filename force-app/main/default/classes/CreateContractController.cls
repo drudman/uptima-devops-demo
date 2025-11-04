@@ -1,4 +1,5 @@
 public class CreateContractController {
+//A controller class to create contract from source record
 @AuraEnabled
     public static List<String> getCreatedRecord(String sourceRecordId, Boolean autoDocgen) {
         ConnectApi.ContractInputRepresentation objInput = new ConnectApi.ContractInputRepresentation();
