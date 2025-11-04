@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <description>Determine if the requested Quote discount is greater than 50%</description>
+        <name>Check_discount_greater_than_50_percent</name>
+        <label>Check discount greater than 50 percent</label>
+        <locationX>182</locationX>
+        <locationY>458</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Greater_than_50_percent</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Quote_Record_for_the_Record_ID.Outputs.XXFetchedQuoteRecord.Discount</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <numberValue>50.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Send_for_next_approval</targetReference>
+            </connector>
+            <label>Greater than 50 percent</label>
+        </rules>
+    </decisions>
+    <decisions>
+        <description>If the Quote discount is greater than 25%, then execute this step</description>
+        <name>If_Quote_discount_is_greater_than_25</name>
+        <label>If Quote discount is greater than 25</label>
+        <locationX>380</locationX>
+        <locationY>242</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Discount_25</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Quote_Record_for_the_Record_ID.Outputs.XXFetchedQuoteRecord.Discount</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <numberValue>25.0</numberValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Send_for_approval</targetReference>
+            </connector>
+            <label>Discount &gt; 25</label>
+        </rules>
+    </decisions>
+    <description>Check Quote Discount requested and route for approval based on the level of discount requested</description>
+    <environments>Default</environments>
+    <interviewLabel>Discount Threshold Approval {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Discount Threshold Approval</label>
+    <orchestratedStages>
+        <name>Get_the_Quote_Record_First</name>
+        <label>Get the Quote Record First</label>
+        <locationX>380</locationX>
+        <locationY>134</locationY>
+        <connector>
+            <targetReference>If_Quote_discount_is_greater_than_25</targetReference>
+        </connector>
+        <exitConditionLogic>and</exitConditionLogic>
+        <stageSteps>
+            <description>Retrieve the Quote record using the Quote Record ID that was passed to the Flow</description>
+            <name>Get_Quote_Record_for_the_Record_ID</name>
+            <actionName>Get_Quote_Record</actionName>
+            <actionType>stepBackground</actionType>
+            <canAssigneeEdit>false</canAssigneeEdit>
+            <debugSimulateStep>false</debugSimulateStep>
+            <entryConditionLogic>and</entryConditionLogic>
+            <exitConditionLogic>and</exitConditionLogic>
+            <inputParameters>
+                <name>XXinputQuoteID</name>
+                <value>
+                    <elementReference>recordId</elementReference>
+                </value>
+            </inputParameters>
+            <label>Get Quote Record for the Record ID</label>
+            <requiresAsyncProcessing>false</requiresAsyncProcessing>
+            <runAsUser>false</runAsUser>
+            <shouldLock>false</shouldLock>
+            <stepSubtype>BackgroundStep</stepSubtype>
+        </stageSteps>
+    </orchestratedStages>
+    <orchestratedStages>
+        <name>Send_for_approval</name>
+        <label>Send for approval</label>
+        <locationX>182</locationX>
+        <locationY>350</locationY>
+        <connector>
+            <targetReference>Check_discount_greater_than_50_percent</targetReference>
+        </connector>
+        <exitConditionLogic>and</exitConditionLogic>
+        <stageSteps>
+            <description>Route the Quote for approval when the discount is greater than 25%</description>
+            <name>Approval_Discount_Greater_than_25</name>
+            <actionName>standard_approvals__EvaluateApproval</actionName>
+            <actionType>stepApproval</actionType>
+            <assignees>
+                <assignee>
+                    <stringValue>mike.vsbsbu4tk0xp.3kkqz3xq6e6k.6p58nphcfxcj.mgbbqqjjjyco.onoj7b6k1lha@rlm.org</stringValue>
+                </assignee>
+                <assigneeType>User</assigneeType>
+            </assignees>
+            <canAssigneeEdit>false</canAssigneeEdit>
+            <debugSimulateStep>false</debugSimulateStep>
+            <entryConditionLogic>and</entryConditionLogic>
+            <exitConditionLogic>and</exitConditionLogic>
+            <inputParameters>
+                <name>ActionInput__RecordId</name>
+                <value>
+                    <elementReference>recordId</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>ActionInput__ApprovalChainName</name>
+            </inputParameters>
+            <label>Approval Discount Greater than 25</label>
+            <requiresAsyncProcessing>false</requiresAsyncProcessing>
+            <runAsUser>false</runAsUser>
+            <shouldLock>false</shouldLock>
+            <stepSubtype>ApprovalStep</stepSubtype>
+        </stageSteps>
+    </orchestratedStages>
+    <orchestratedStages>
+        <name>Send_for_next_approval</name>
+        <label>Send for next approval</label>
+        <locationX>50</locationX>
+        <locationY>566</locationY>
+        <exitConditionLogic>and</exitConditionLogic>
+        <stageSteps>
+            <description>The discount requested on the Quote is greater than 50 percent, route to a higher level in the organization for review and approval</description>
+            <name>Approval_discount_greater_than_50_percent</name>
+            <actionName>standard_approvals__EvaluateApproval</actionName>
+            <actionType>stepApproval</actionType>
+            <assignees>
+                <assignee>
+                    <stringValue>sonia.mnge8xpgcazs.dzdgzz6du5du.pabrw5wyls6x.qjbdh7rccpba.7p0vaic2tjkv@rlm.org</stringValue>
+                </assignee>
+                <assigneeType>User</assigneeType>
+            </assignees>
+            <canAssigneeEdit>false</canAssigneeEdit>
+            <debugSimulateStep>false</debugSimulateStep>
+            <entryConditionLogic>and</entryConditionLogic>
+            <exitConditionLogic>and</exitConditionLogic>
+            <inputParameters>
+                <name>ActionInput__RecordId</name>
+                <value>
+                    <elementReference>recordId</elementReference>
+                </value>
+            </inputParameters>
+            <inputParameters>
+                <name>ActionInput__ApprovalChainName</name>
+            </inputParameters>
+            <label>Approval discount greater than 50 percent</label>
+            <requiresAsyncProcessing>false</requiresAsyncProcessing>
+            <runAsUser>false</runAsUser>
+            <shouldLock>false</shouldLock>
+            <stepSubtype>ApprovalStep</stepSubtype>
+        </stageSteps>
+    </orchestratedStages>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>ApprovalWorkflow</processType>
+    <runInMode>SystemModeWithoutSharing</runInMode>
+    <start>
+        <locationX>254</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_the_Quote_Record_First</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+    <variables>
+        <name>recordId</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>submissionComments</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+    <variables>
+        <name>submitter</name>
+        <dataType>String</dataType>
+        <isCollection>false</isCollection>
+        <isInput>true</isInput>
+        <isOutput>false</isOutput>
+    </variables>
+</Flow>
